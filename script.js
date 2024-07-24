@@ -128,4 +128,16 @@ Promise.all([
             .duration(0)
             .style("opacity", 0);
     }
+
+    // add state borders
+    const statesUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
+    d3.json(statesUrl).then((states) => {
+        svg.append("path")
+            .datum(topojson.mesh(usData, usData.objects.states, (a, b) => a !== b))
+            .attr("class", "states")
+            .attr("fill", "none")
+            .attr("stroke", "#fff")
+            .attr("stroke-linejoin", "round")
+            .attr("d", path);
+    })
 });
