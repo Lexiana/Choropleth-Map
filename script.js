@@ -11,7 +11,7 @@ const width = 960,
         left: 20
     };
 
-    
+
 // create svg
 const svg = d3.select("#map")
     .append("svg")
@@ -39,30 +39,79 @@ const tooltip = d3.select("body").append("div")
 Promise.all([
     d3.json(educationDataUrl), d3.json(usCountyDataUrl)
 ]).then(([educationData, usData]) => {
-    
+
     // process data
     const counties = topojson.feature(usData, usData.objects.counties);
+
+    // create color scale
+    const minEducation = d3.min(educationData, d => d.bachelorsOrHigher);
+    const maxEducation = d3.max(educationData, d => d.bachelorsOrHigher);
+    const colorScale = d3.scaleQuantize()
+        .domain([minEducation, maxEducation])
+        .range(d3.schemeGreens[8]);
+
+    console.log(d3.schemeGreens[8]);
+    console.log(minEducation);
+    console.log(maxEducation);
 
     // create path generator
     const path = d3.geoPath();
 
     // draw counties
-    const usCounties = svg.append("g")
+    svg.append("g")
         .selectAll("path")
         .data(counties.features)
         .enter()
         .append("path")
         .attr("class", "county")
         .attr("d", path)
-        .attr("fill", d=>{
-            const county= educationData.find(item =>item.fips === d.id);
+        .attr("fill", d => {
+            const county = educationData.find(item => item.fips === d.id);
             return county ? colorScale(county.bachelorsOrHigher) : "#ccc";
         })
         .attr("stroke", "#fff")
         .attr("stroke-width", "0.5")
         .attr("data-fips", d => d.id)
-        .attr("data-education", d => educationData.find(item => item.fips === d.id).bachelorsOrHigher);
+        .attr("data-education", d => educationData.find(item => item.fips === d.id).bachelorsOrHigher)
+        .on("mouseover", handleMouseOver)
+        .on("mouseout", handleMouseOut);
 
     // add legend
+    const legendWidth = 300;
+    const legendHeight = 20;
+    const legend = svg.append("g")
+        .attr("transform", `translate(${width - margin.right - legendWidth}, ${margin.top})`);
+
+    const legendScale = d3.scaleLinear()
+        .domain(colorScale.domain())
+        .range([0, legendWidth]);
+
+    const legendAxis = d3.axisBottom(legendScale)
+        .tickSize(legendHeight)
+        .tickFormat(d => `${d.toFixed(0)}%`)
+        .ticks(8);
+
+    legend.selectAll("rect")
+        .data(d3.range(8))
+        .enter()
+        .append("rect")
+        .attr("x", d => d * (legendWidth / 8))
+        .attr("width", legendWidth / 8)
+        .attr("height", legendHeight)
+        .attr("fill", d => d3.schemeGreens[8][d]);
+
+    legend.call(legendAxis)
+        .select(".domain")
+        .remove();
+
     
+
+    // handle tooltip
+    function handleMouseOver(event, d) {
+
+    }
+
+    function handleMouseOut(event, d) {
+
+    }
 });

@@ -49,5 +49,6 @@ body{
     border: solid 1px white;
     border-radius: 5px;
     pointer-events: none;
+    box-shadow: 0 0 5px black;
 }
 
