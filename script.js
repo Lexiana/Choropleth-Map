@@ -57,6 +57,7 @@ Promise.all([
     // create path generator
     const path = d3.geoPath();
 
+    
     // draw counties
     svg.append("g")
         .selectAll("path")
@@ -104,14 +105,27 @@ Promise.all([
         .select(".domain")
         .remove();
 
-    
+
 
     // handle tooltip
     function handleMouseOver(event, d) {
+        const county = educationData.find(item => item.fips === d.id);
+        if(county) {
+            tooltip.transition()
+                .duration(0)
+                .style("opacity", .8)
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 28) + "px");
 
+            tooltip.html(
+                `${county.area_name}, ${county.state}: ${county.bachelorsOrHigher}%`
+            )
+        }
     }
 
     function handleMouseOut(event, d) {
-
+        tooltip.transition()
+            .duration(0)
+            .style("opacity", 0);
     }
 });
